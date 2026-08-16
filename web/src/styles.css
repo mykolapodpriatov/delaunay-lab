@@ -1,0 +1,109 @@
+:root {
+  color-scheme: dark;
+  --bg: #070a14;
+  --ink: #e8eefc;
+  --muted: #93a0c2;
+  --line: rgba(148, 163, 184, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    radial-gradient(circle at 10% 0, rgba(94, 234, 212, 0.12), transparent 36%),
+    radial-gradient(circle at 90% 100%, rgba(244, 114, 182, 0.1), transparent 40%),
+    var(--bg);
+  color: var(--ink);
+  font-family: "Avenir Next", "Segoe UI", sans-serif;
+}
+
+.page {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px 20px 48px;
+}
+
+.kicker {
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 0.7rem;
+  color: #5eead4;
+  margin: 0;
+}
+
+h1 {
+  margin: 8px 0 10px;
+  font-size: clamp(2.2rem, 5vw, 3.8rem);
+  letter-spacing: -0.04em;
+}
+
+.lede {
+  color: var(--muted);
+  max-width: 62ch;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: 16px;
+}
+
+.panel,
+.stage {
+  border: 1px solid var(--line);
+  background: rgba(8, 12, 24, 0.72);
+  padding: 14px;
+}
+
+.chk {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 8px 0;
+}
+
+.row {
+  display: grid;
+  gap: 8px;
+  margin: 16px 0 8px;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  background: #134e4a;
+  color: #ecfeff;
+  border: 1px solid #2dd4bf;
+  padding: 8px 10px;
+}
+
+button.ghost {
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+  width: 100%;
+}
+
+canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  cursor: crosshair;
+}
+
+.stats {
+  font-family: ui-monospace, Menlo, monospace;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+
+@media (max-width: 800px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
