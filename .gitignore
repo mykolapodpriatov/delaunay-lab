@@ -1,0 +1,9 @@
+/target
+**/*.rs.bk
+.idea/
+.vscode/
+.DS_Store
+web/node_modules/
+web/dist/
+web/src/wasm/
+*.log

@@ -1,0 +1,11 @@
+[workspace]
+members = ["crates/delaunay-core", "crates/delaunay-wasm"]
+resolver = "2"
+
+[workspace.package]
+edition = "2021"
+license = "MIT"
+version = "0.1.0"
+
+[workspace.dependencies]
+serde = { version = "1", default-features = false, features = ["alloc", "derive"] }

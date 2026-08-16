@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>delaunay-lab</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header>
+        <p class="kicker">point cloud · not a polygon mesher</p>
+        <h1>delaunay-lab</h1>
+        <p class="lede">
+          Click to drop sites. Incremental Bowyer–Watson grows a Delaunay mesh; the dual is the
+          Voronoi diagram. The Rust crate is the exact-predicate kernel.
+        </p>
+      </header>
+      <div class="layout">
+        <aside class="panel">
+          <label class="chk"><input type="checkbox" id="show-delaunay" checked /> Delaunay</label>
+          <label class="chk"><input type="checkbox" id="show-voronoi" checked /> Voronoi</label>
+          <label class="chk"><input type="checkbox" id="show-hull" checked /> Convex hull</label>
+          <div class="row">
+            <button type="button" data-gen="uniform">Uniform</button>
+            <button type="button" data-gen="circle">Circle</button>
+            <button type="button" data-gen="clusters">Clusters</button>
+          </div>
+          <button type="button" id="clear" class="ghost">Clear</button>
+          <p id="stats" class="stats"></p>
+        </aside>
+        <section class="stage">
+          <canvas id="cv" width="960" height="680"></canvas>
+        </section>
+      </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
