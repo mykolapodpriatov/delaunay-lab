@@ -168,11 +168,6 @@ fn triangulation_is_deterministic() {
 fn large_cloud_completes() {
     // Slow enough to be useless before the quadratic dedup and the unfiltered
     // incircle scan were removed, which is the honest way to pin the fix.
-    //
-    // This does NOT assert that the triangles tile the hull. They do not, for a
-    // uniform cloud of any size, on this implementation; that is a separate
-    // pre-existing defect and asserting it here would either fail or have to be
-    // weakened into meaninglessness.
     let pts = generate(29, Distribution::Uniform, 4000, 100_000);
     let mesh = triangulate(&pts);
     assert_eq!(mesh.points.len(), 4000);
@@ -186,6 +181,37 @@ fn large_cloud_completes() {
             ) > 0,
             "triangle not CCW"
         );
+    }
+}
+
+#[test]
+fn exact_tiling_across_distributions_and_sizes() {
+    // The triangle set must exactly tile the convex hull: total triangle area
+    // has to equal the hull area, with no gaps and no overlaps. This check is
+    // linear in the triangle count, so it is cheap enough to run over a large
+    // cloud rather than just the tiny fixtures (`square_two_triangles`,
+    // `area_matches_hull`) that happened to pass before the super-triangle
+    // sizing was fixed: those use 4 and 30 points, too few to expose the
+    // hull-boundary gap that a too-small super-triangle leaves behind at any
+    // larger size. See the `triangulate` doc comment on `super_triangle_offset`
+    // (in incremental.rs) for the bound this pins down.
+    let distributions = [
+        Distribution::Uniform,
+        Distribution::Circle,
+        Distribution::Clusters,
+    ];
+    let sizes = [5usize, 10, 50, 200, 400, 1000, 2000, 4000];
+    for &dist in &distributions {
+        for &n in &sizes {
+            let pts = generate(29, dist, n, 100_000);
+            let mesh = triangulate(&pts);
+            let tris: Vec<[usize; 3]> = mesh.triangles.iter().map(|t| t.v).collect();
+            assert_eq!(
+                area2_sum(&mesh.points, &tris),
+                hull_area2(&mesh.hull),
+                "{dist:?} n={n}: triangles do not tile the hull"
+            );
+        }
     }
 }
 

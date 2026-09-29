@@ -139,9 +139,10 @@ pub fn triangulate(input: &[Point]) -> Mesh {
     let d = dx.max(dy);
     let mid_x = (min_x + max_x) / 2;
     let mid_y = (min_y + max_y) / 2;
-    let s1 = Point::new(mid_x - 20 * d, mid_y - d);
-    let s2 = Point::new(mid_x + 20 * d, mid_y - d);
-    let s3 = Point::new(mid_x, mid_y + 20 * d);
+    let offset = super_triangle_offset(d);
+    let s1 = Point::new(mid_x - offset, mid_y - offset);
+    let s2 = Point::new(mid_x + offset, mid_y - offset);
+    let s3 = Point::new(mid_x, mid_y + offset);
 
     let mut points = unique.clone();
     let i1 = points.len();
@@ -235,6 +236,50 @@ pub fn triangulate(input: &[Point]) -> Mesh {
         points: unique,
         triangles,
     }
+}
+
+/// How far each super-triangle vertex must sit from the bounding-box
+/// midpoint so that it can never fall inside the circumcircle of a triangle
+/// built from real points, i.e. so stripping the super vertices at the end
+/// never leaves a hole where a super-vertex-touching triangle "won" over the
+/// real one on the boundary.
+///
+/// Derivation: any two points inside the bounding box are within Euclidean
+/// distance `2*d` of each other (each axis span is at most `d`, so each
+/// point is within `d` of the midpoint, by the triangle inequality). Points
+/// sit on an integer lattice, so a non-degenerate triangle has a twice-area
+/// of at least one, meaning by `R = (side_a * side_b * side_c) / (4 * area)`
+/// its circumradius is at most `(2d)^3 / 2`, i.e. `4*d^3`. A point further
+/// than `2*R + d` from the midpoint is outside that circle: crossing the
+/// disk from any point on it costs at most `2*R`, and the circumcenter
+/// itself is within `R + d` of the midpoint (it sits exactly `R` from a
+/// vertex, which is within `d` of the midpoint). So `8*d^3 + d` is a
+/// proven-sufficient offset.
+///
+/// That bound is only tight for a deliberately near-degenerate triangle
+/// (twice-area of exactly one) stretched across the whole point cloud;
+/// ordinary point clouds need far less. It also grows faster than the exact
+/// `i128` arithmetic in `incircle`/`orient` can take once the super-triangle
+/// vertices are folded in: the very first triangle is the three super
+/// vertices themselves, and its `incircle` test against the first real point
+/// multiplies four offset-scaled terms together, so the offset needs to stay
+/// under roughly the fourth root of `i128::MAX`. `SAFE_CEILING` is
+/// comfortably inside that limit, so the smaller of the two bounds is used;
+/// the proven-sufficient bound only matters, and only applies, for small
+/// point clouds, where it is well under the ceiling anyway.
+fn super_triangle_offset(d: i64) -> i64 {
+    const SAFE_CEILING: i128 = 1_000_000_000;
+
+    let d128 = d as i128;
+    let proven_sufficient = d128
+        .checked_mul(d128)
+        .and_then(|d2| d2.checked_mul(d128))
+        .and_then(|d3| d3.checked_mul(8))
+        .and_then(|v| v.checked_add(d128))
+        .and_then(|v| v.checked_add(1))
+        .unwrap_or(i128::MAX);
+
+    proven_sufficient.min(SAFE_CEILING).max(d128 + 1) as i64
 }
 
 /// Wrap a triangle with its circumcircle bound.
