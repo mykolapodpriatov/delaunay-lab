@@ -1,5 +1,6 @@
 use delaunay_core::{
     convex_hull, generate, incircle, orient, triangulate, voronoi_edges, Distribution, Point,
+    MAX_POINTS,
 };
 
 fn area2_sum(points: &[Point], tris: &[[usize; 3]]) -> i128 {
@@ -229,4 +230,10 @@ fn heavy_duplication_is_cheap_and_correct() {
     let mesh = triangulate(&pts);
     assert_eq!(mesh.points.len(), 4);
     assert_eq!(mesh.triangles.len(), 2);
+}
+
+#[test]
+#[should_panic(expected = "exceeds the limit")]
+fn generate_refuses_an_unbounded_count() {
+    let _ = generate(1, Distribution::Uniform, MAX_POINTS + 1, 10);
 }
