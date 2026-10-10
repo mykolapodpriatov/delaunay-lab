@@ -27,7 +27,20 @@ impl Lcg {
     }
 }
 
+/// Largest point set `generate` will allocate.
+///
+/// The wasm export takes `n` from the page. Without a ceiling a single call
+/// can ask the module for more memory than the browser will grant, and the
+/// tab dies instead of returning an error. Four thousand points is the
+/// largest set the native tests build; this leaves that headroom and stops
+/// the unbounded case.
+pub const MAX_POINTS: usize = 100_000;
+
 pub fn generate(seed: u64, dist: Distribution, n: usize, scale: i64) -> Vec<Point> {
+    assert!(
+        n <= MAX_POINTS,
+        "generate: {n} points exceeds the limit of {MAX_POINTS}"
+    );
     let mut rng = Lcg::new(seed);
     match dist {
         Distribution::Uniform => (0..n)

@@ -7,7 +7,7 @@ mod point;
 mod predicates;
 mod voronoi;
 
-pub use generators::{generate, Distribution};
+pub use generators::{generate, Distribution, MAX_POINTS};
 pub use hull::convex_hull;
 pub use incremental::{triangulate, Mesh, Triangle};
 pub use point::Point;

@@ -1,4 +1,4 @@
-use delaunay_core::{generate, triangulate, voronoi_edges, Distribution, Point};
+use delaunay_core::{generate, triangulate, voronoi_edges, Distribution, Point, MAX_POINTS};
 use serde::Serialize;
 use wasm_bindgen::prelude::*;
 
@@ -19,6 +19,11 @@ pub fn generate_points(seed: u64, distribution: u8, n: usize) -> Result<JsValue,
         2 => Distribution::Clusters,
         _ => return Err(JsValue::from_str("unknown distribution")),
     };
+    if n > MAX_POINTS {
+        return Err(JsValue::from_str(&format!(
+            "refusing to generate {n} points; the limit is {MAX_POINTS}"
+        )));
+    }
     let pts = generate(seed, dist, n, 800);
     serde_wasm_bindgen::to_value(&pts).map_err(|e| e.into())
 }
@@ -26,6 +31,12 @@ pub fn generate_points(seed: u64, distribution: u8, n: usize) -> Result<JsValue,
 #[wasm_bindgen]
 pub fn build_mesh(points: JsValue) -> Result<JsValue, JsValue> {
     let pts: Vec<Point> = serde_wasm_bindgen::from_value(points)?;
+    if pts.len() > MAX_POINTS {
+        return Err(JsValue::from_str(&format!(
+            "refusing to triangulate {} points; the limit is {MAX_POINTS}",
+            pts.len()
+        )));
+    }
     let mesh = triangulate(&pts);
     let (centers, edges) = voronoi_edges(&mesh, 80.0);
     let payload = MeshJson {
