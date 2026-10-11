@@ -41,6 +41,19 @@ fn three_points_one_triangle() {
 }
 
 #[test]
+fn large_coordinates_do_not_overflow_incircle() {
+    // 2^40 coordinates overflow a bare i128 product in the lifted determinant.
+    // Debug used to panic and release used to flip the sign.
+    let pts = [
+        Point::new(0, 0),
+        Point::new(1 << 40, 0),
+        Point::new(0, 1 << 40),
+    ];
+    let mesh = triangulate(&pts);
+    assert_eq!(mesh.triangles.len(), 1);
+}
+
+#[test]
 fn square_two_triangles() {
     let pts = [
         Point::new(0, 0),
